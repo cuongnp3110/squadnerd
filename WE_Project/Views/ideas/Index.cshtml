@@ -1,0 +1,191 @@
+﻿@model IEnumerable<WE_Project.Models.idea>
+
+
+@{
+    ViewBag.Title = "Index";
+
+}
+
+<div class="col-lg-12">
+    <div class="card mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h5 class="col-lg-10 m-0 font-weight-bold text-primary" style="font-size:25px">Topic: @ViewBag.topic_name</h5>
+            @if (ViewBag.closure == null || DateTime.Compare(DateTime.Now.Date, DateTime.ParseExact(ViewBag.closure,"MM/dd/yy", null)) <= 0)
+            {
+                <button type="button" class="btn btn-primary" data-toggle="modal"
+                        data-target="#exampleModalScrollable" id="#modalScroll">
+                    Post an idea
+                </button>
+
+                <div class="modal fade" id="exampleModalScrollable" tabindex="-1" role="dialog"
+                     aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-scrollable" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalScrollableTitle">Post New Idea</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+
+                                    @if (ViewBag.ErrorMessage != null && ViewBag.ErrorMessage != "")
+                                    {
+                                        <div class="text-danger">@ViewBag.ErrorMessage</div>
+                                    }
+
+                            <form>
+                                <div class="form-group" hidden>
+                                    <lable>Category</lable>
+                                    <input class="form-control" type="text" value="@ViewBag.id" id="idea_topic_id" />
+                                </div>
+
+                                <!-- Title -->
+                                <div class="form-group">
+                                    <label for="exampleInputEmail1"> Title</label>
+                                    <input type="text"  class="form-control" placeholder="Enter Title" id="idea_title" />
+                                </div>
+                                <div class="form-group">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="idea_anonymous">
+                                        <label class="custom-control-label" for="idea_anonymous">Anonymous</label>
+                                    </div>
+                                </div>
+                                    <!-- Content -->
+
+                                    <div class="form-group">
+                                        <label for="exampleFormControlTextarea1">Content</label>
+                                        <textarea class="form-control" id="idea_content" style="resize:none;height:278px" contenteditable="inherit" placeholder="Write your idea here" ></textarea>      
+                                    </div>
+                                    <!-- Select Box -->
+                                    <div class="form-group">
+                                        <lable>Category</lable>
+                                        @Html.DropDownList("category_id", null, htmlAttributes: new { @class = "form-control", @id = "idea_category_id" })
+                                    </div>
+
+
+                                    <!-- Choose file -->
+                                    <div class="form-group">
+                                        <label for="exampleFormControlTextarea1">Supported: IMAGE/WORD/PDF/EXCEL/TXT/ZIP (Up to 5Mb)</label>
+                                        <input type="file" id="files" name="files" multiple>
+                                    </div>
+                                    <!-- Check box -->
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="customCheck2">
+                                        <label class="custom-control-label" for="customCheck2">Agree to <a href="@Url.Action("TermAndConditions", "Home")" target="_blank" rel="noopener noreferrer">Terms and Conditions</a></label>
+                                    </div>
+
+                                </form>  
+                            </div>
+                            <div class="modal-footer">
+                                <button id="submits" name="submits" onclick="postIdea()" class="btn btn-primary">Post</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+      
+        <div class="col-lg-12">
+            <div class="col-lg-1"></div>
+            <div class="col-lg-11">
+                <p>Closure Date: <b>@ViewBag.closure</b>  | Final Date: <b>@ViewBag.final</b> </p>
+            </div>
+            <div class="card mb-4">
+
+
+
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary" style="font-size:20px">Idea List</h6>
+                </div>
+                <div class="col-md-6">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSort" aria-expanded="true"
+                       aria-controls="collapseSort">
+                        <i class="fa-solid fa-arrow-down-short-wide"></i>
+                        <span>@ViewBag.sort</span>
+                    </a>
+                    <div id="collapseSort" class="collapse" aria-labelledby="headingTable" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <a class="collapse-item" href="@Url.Action("Index", "ideas",  new { id= ViewBag.id, sort=1 })">Latest </a>&emsp;
+                            <a class="collapse-item" href="@Url.Action("Index", "ideas",  new { id= ViewBag.id, sort=2 })">Most Popular </a>&emsp;
+                            <a class="collapse-item" href="@Url.Action("Index", "ideas",  new { id= ViewBag.id, sort=3 })">Most Viewed</a>&emsp;
+                            <a class="collapse-item" href="@Url.Action("Index", "ideas",  new { id= ViewBag.id, sort=4 })">Latest Comments</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive p-3">
+                    <table class="table align-items-center table-flush table-hover" id="dataTableHover">
+                        <thead hidden>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td hidden></td>
+                                    <td>
+                                        <a style="text-decoration:none; color:inherit" href="@Url.Action("Details", "ideas", new { id = item.idea_id})">
+                                            <div class="form-group">
+                                                <hr />
+                                                <label style="font-weight: bold;font-size: 20px; margin-top: -10px;" for="exampleFormControlTextarea1">@Html.DisplayFor(modelItem => item.idea_title) <hr style="background-color: #fc544b; margin-top: 3px;" /></label>
+                                                <div style="margin-bottom:15px; margin-top: -12px;">
+                                                    @if (item.idea_trigger == false)
+                                                    {
+                                                        <span style="font-weight: bold;">@Html.DisplayFor(modelItem => item.account.fname)</span>
+                                                        <div>
+                                                            @if (item.account.position != null)
+                                                            {
+                                                                <p style="font-size: 12px;">@Html.DisplayFor(modelItem => item.account.position), @Html.DisplayFor(modelItem => item.account.department.department_name) </p>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span style="font-weight: bold;">Anonymous</span>
+                                                    }
+
+                                                </div>
+                                                <p style="  font-size: 14px;
+                                                                            line-height: 24px;
+                                                                            overflow: hidden;
+                                                                            text-overflow: ellipsis;
+                                                                            display: -webkit-box;
+                                                                            -webkit-line-clamp: 2;
+                                                                            -webkit-box-orient: vertical;
+                                                                            margin-bottom: 5px;
+                                                                            margin-top: -7px;">
+
+                                                    @Html.DisplayFor(modelItem => item.idea_content)
+                                                </p>
+                                                <div style="display: inline; font-size: 12px;">
+                                                    <span>@Html.Action("CalCulateTime", "Home", new { date = item.idea_date }) @*@Html.DisplayFor(modelItem => item.idea_date)*@  &emsp;  &nbsp;</span>
+                                                    <span>@Html.DisplayFor(modelItem => item.views) <i class="fa-solid fa-eye"></i> &emsp;  &nbsp;</span>
+                                                    <span>@Html.DisplayFor(modelItem => item.thumbs_up) <i class="fa-solid fa-thumbs-up"></i> &emsp;&nbsp; </span>
+                                                    <span>@Html.DisplayFor(modelItem => item.thumbs_down) <i class="fa-solid fa-thumbs-down"></i></span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        @if(Session["state"].ToString() == "1")
+                                        {
+                                            <a href="@Url.Action("Delete", "ideas", new { id = item.idea_id})" onclick="return confirm('Are you sure to delete this idea?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        }                                     
+                                    </td>
+                                </tr>
+
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>

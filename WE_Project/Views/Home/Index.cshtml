@@ -1,0 +1,16 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    @@media (min-width:768px){#showButton{display:none}}
+    @@media (max-width:768px){#showButton{display: block}}
+</style>
+
+<div>
+    <img src="~/img/slide.png" style="width:100%" />
+</div>
+
+<a class="btn btn-primary" id="showButton" style="margin-top:10px;" href="@Url.Action("Index", "Login")">
+    Join us
+</a>
